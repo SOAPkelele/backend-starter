@@ -4,6 +4,7 @@ import {
   modelOptions,
   prop,
 } from '@typegoose/typegoose'
+import { ObjectId } from 'mongoose'
 import { omit } from 'lodash'
 import { sign } from '@/helpers/jwt'
 
@@ -11,14 +12,17 @@ import { sign } from '@/helpers/jwt'
   schemaOptions: { timestamps: true },
 })
 export class User {
+  id!: ObjectId
   @prop({ index: true, lowercase: true })
   email?: string
   @prop({ index: true, lowercase: true })
   facebookId?: string
+  @prop({ unique: true, index: true })
+  telegramId!: number
   @prop({ index: true })
-  telegramId?: number
-  @prop({ required: true, index: true })
-  name!: string
+  telegramUsername?: string
+  @prop({ index: true })
+  name?: string
 
   @prop({ index: true, unique: true })
   token?: string
@@ -47,7 +51,7 @@ export class User {
 export const UserModel = getModelForClass(User)
 
 export async function findOrCreateUser(loginOptions: {
-  name: string
+  name?: string
   email?: string
   facebookId?: string
   telegramId?: number
@@ -63,9 +67,43 @@ export async function findOrCreateUser(loginOptions: {
   if (!user) {
     throw new Error('User not found')
   }
+
   if (!user.token) {
     user.token = await sign({ id: user.id })
     await user.save()
   }
+
+  return user
+}
+
+export async function findOrCreateTelegramUser({
+  telegramId,
+  telegramUsername,
+}: {
+  telegramId: number
+  telegramUsername?: string
+}) {
+  const user = await UserModel.findOneAndUpdate(
+    { telegramId },
+    {},
+    {
+      upsert: true,
+      new: true,
+    }
+  )
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  if (user.telegramUsername !== telegramUsername) {
+    user.telegramUsername = telegramUsername
+    await user.save()
+  }
+
+  if (!user.token) {
+    user.token = await sign({ id: user.id })
+    await user.save()
+  }
+
   return user
 }

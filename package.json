@@ -15,6 +15,7 @@
     "lint": "yarn pretty && eslint --max-warnings 0 --ext ts,tsx,json src"
   },
   "dependencies": {
+    "@grammyjs/runner": "^1.0.4",
     "@hapi/boom": "^10.0.0",
     "@koa/cors": "^4.0.0",
     "amala": "^8.0.2",
@@ -22,6 +23,8 @@
     "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
     "facebook-node-sdk": "^0.2.0",
+    "grammy": "^1.13.0",
+    "grammy-middlewares": "^1.0.11",
     "jsonwebtoken": "^9.0.0",
     "koa": "^2.14.1",
     "koa-bodyparser": "^4.3.0",
